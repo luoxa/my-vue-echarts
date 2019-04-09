@@ -4,9 +4,26 @@
 
 <script>
     import echarts from 'echarts'
+    import { addListener, removeListener } from 'resize-detector'
 
     export default {
-        props:['chartType','chartDimensions','chartDatasetSource'],
+        props:{
+            'chartType':{
+                required:false,
+                type:String,
+                default:'bar'
+            },
+            'chartDimensions':{
+                required:false,
+                type:Array,
+                default:[]
+            },
+            'chartDatasetSource':{
+                required:false,
+                type:Array,
+                default:[]
+            }
+        },
         data(){
             return {
                 chart:null,
@@ -16,13 +33,13 @@
                     legend : {top:20},
                     tooltip : {},
                     dataset : {
-                        dimensions:eval(this.chartDimensions),
-                        source:eval(this.chartDatasetSource)
+                        dimensions : this.chartDimensions,
+                        source : this.chartDatasetSource
                     },
                     xAxis : [{type : 'category' } ],
                     yAxis : [{type : 'value'} ],
                     series : (()=>{
-                        var series = new Array(Object.keys(eval(this.chartDatasetSource)[0]).length-1);
+                        var series = new Array(Object.keys(this.chartDatasetSource[0]).length-1);
                         series.fill({type:this.chartType});
                         return series;
                     })()
@@ -30,15 +47,21 @@
             }
         },
         created(){
-            console.info("created...");
+
         },
         mounted(){
-            console.info("mounted...");
             this.chart = echarts.init(this.$el);
             this.chart.setOption(this.option,true);
+
+            addListener(this.$el, this.onResize)
         },
         updated(){
-            console.info("updated...");
+
+        },
+        methods:{
+            onResize(){
+                this.chart.resize();
+            }
         },
         watch:{
             option:{
